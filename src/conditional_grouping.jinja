@@ -1,0 +1,60 @@
+-- This shows how to conditionally group, when a filter is selected
+-- By default, it uses 'ALL' as the column value, when there is no filter selected
+-- When a filter is selected, it uses the actual column name in the query, to get the real value
+
+{% set SELECT_CATEGORY = "'ALL'" %}
+
+{% set groupByCategory = filter_values('category_name') %}
+{% if groupByCategory is defined and groupByCategory | length %}
+{% set SELECT_CATEGORY = "category_name" %}
+{% endif %}
+
+
+SELECT
+  {{SELECT_CATEGORY}} as category_name,
+  SUM(amount) as amount,
+  SUM(quantity) as quantity
+FROM net_sales_by_category 
+GROUP BY
+  category_name
+
+
+
+-- This is a more complex example with 2 groupings
+-- When the `location_name` is filtered, it also groups by other columns
+
+{% set SELECT_POS_KEY = "'ALL'" %}
+{% set SELECT_STORE_ID = "'ALL'" %}
+{% set SELECT_LOCATION = "'ALL'" %}
+{% set SELECT_CATEGORY = "'ALL'" %}
+
+{% set groupByLocation = filter_values('location_name') %}
+{% if groupByLocation is defined and groupByLocation | length %}
+{% set SELECT_POS_KEY = "pos_key" %}
+{% set SELECT_STORE_ID = "store_id" %}
+{% set SELECT_LOCATION = "location_name" %}
+{% endif %}
+
+{% set groupByCategory = filter_values('category_name') %}
+{% if groupByCategory is defined and groupByCategory | length %}
+{% set SELECT_CATEGORY = "category_name" %}
+{% endif %}
+
+
+SELECT
+  {{SELECT_LOCATION}} as location_name,
+  {{SELECT_CATEGORY}} as category_name,
+  {{SELECT_POS_KEY}} as pos_key,
+  {{SELECT_STORE_ID}} as store_id,
+  dob,
+  order_hour,
+  SUM(amount) as amount,
+  SUM(quantity) as quantity
+FROM net_sales_by_category 
+GROUP BY
+  location_name,
+  category_name,
+  pos_key,
+  store_id,
+  dob,
+  order_hour
